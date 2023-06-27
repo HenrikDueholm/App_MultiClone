@@ -6,7 +6,7 @@ from collections import namedtuple
 from App_MultiClone.Git.Clone import git_clone
 
 # Define named tuple type
-CloneResult = namedtuple('CloneResult', ['path', 'status'])
+clone_result = namedtuple("clone_result", ["path", "status"])
 
 def git_clone_url(url, path=None, force=True, depth=1, branch=None, commit=None):
     """
@@ -43,7 +43,7 @@ def git_clone_url(url, path=None, force=True, depth=1, branch=None, commit=None)
     if os.path.exists(repo_path) and force:
         try:
             # Removal using rmdir (note: shutil.rmtree does not have required access)
-            command = ['rmdir', repo_path, '/s', '/q']
+            command = ["rmdir", repo_path, "/s", "/q"]
             subprocess.run(command, shell=True)
             print(f"  Forced removal of: {repo_name}")
         except subprocess.CalledProcessError as e:
@@ -60,7 +60,7 @@ def git_clone_url(url, path=None, force=True, depth=1, branch=None, commit=None)
         print(f"  Successfully cloned repository: {repo_name}")
     else:
         print(f"  Failed to clone repository: {repo_name}")
-    return CloneResult(path=repo_path, status=success)
+    return clone_result(path=repo_path, status=success)
 
 def extract_repo_name(url):
     """
@@ -72,8 +72,8 @@ def extract_repo_name(url):
     Returns:
         string: The name of the repository with anything before ".." removed.
     """
-    url_components = url.split('/')
-    if '..' in url_components[-1]:
-        return url_components[-1].split('..', 1)[1]
+    url_components = url.split("/")
+    if ".." in url_components[-1]:
+        return url_components[-1].split("..", 1)[1]
     else:
         return url_components[-1]

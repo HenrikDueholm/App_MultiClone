@@ -1,22 +1,38 @@
+#####################################################################################################
+# Defines ###########################################################################################
+#####################################################################################################
+
+# Define named tuple types
+from collections import namedtuple
+
+clone_info = namedtuple("clone_info", ["url", "branch", "commit"])
+
+# Define enums
+from enum import Enum, auto
+
+class VersionAction(Enum):
+    USE_TARGET_IF_ARGUMENT_ELSE_NEWEST = auto() #Default
+    ALL_NEWEST = auto()
+    ALWAYS_USE_TARGET = auto()
+
+#####################################################################################################
+# Core ##############################################################################################
+#####################################################################################################
 import sys
 import os
 
-from collections import namedtuple
-
 from App_MultiClone.Clone_URL import git_clone_url
-from App_MultiClone.Clone_URL import CloneResult
-
-# Define named tuple type
-CloneInfo = namedtuple('CloneInfo', ['url', 'branch', 'commit'])
+from App_MultiClone.Clone_URL import clone_result
 
 # Main
-def main(clone_info_list, path=None, force=True, depth=1):
+def main(clone_info_list, path=None, version_action=VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST, force=True, depth=1):
     """
     Main function to perform the cloning process.
 
     Args:
-        clone_info_list (list): List of CloneInfo objects.
+        clone_info_list (list): List of clone_info objects. Use space separated branch= or commit= to specify specific target version.
         path (str, optional, default = os.getcwd()): The absolute clone target path.
+        version_action (VersionAction, optional): Version action to perform. Default is USE_TARGET_IF_ARGUMENT_ELSE_NEWEST.
         force (bool, optional): Whether to force removal of existing repositories. Default is True.
         depth (int, optional): The depth of the clone (number of commits to include). Default is 1.
 
@@ -30,6 +46,7 @@ def main(clone_info_list, path=None, force=True, depth=1):
     print("")
     print("Config:")
     print(f"  Path: {path}")
+    print(f"  Version action: {version_action.name}")
     print(f"  Force: {force}")
     print(f"  Depth: {depth}")
     print("")
@@ -45,6 +62,14 @@ def main(clone_info_list, path=None, force=True, depth=1):
     print(f"  Main: {main_path}")
     print(f"  Sub: {sub_path}")
     print("")
+
+    # Pre-clone handling of VersionAction.ALL_NEWEST
+    if version_action == VersionAction.ALL_NEWEST:
+        for i, clone_info in enumerate(clone_info_list):
+            if clone_info.branch and clone_info.branch.startswith("tags/"): #Tag disregarded
+                clone_info_list[i] = clone_info._replace(branch=None)
+            if clone_info.commit: #Commit disregarded
+                clone_info_list[i] = clone_info._replace(commit=None)
 
     # Clone
     paths = []
@@ -65,19 +90,28 @@ def main(clone_info_list, path=None, force=True, depth=1):
     return results
 
 #####################################################################################################
+# CLI ###############################################################################################
+#####################################################################################################
 
 # Handle CLI
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("")
         print("Usage: python Main.py <url_list> [--path <value>] [--force <value>] [--depth <value>]")
+        print("  <url_list>: Semicolon separated list of urls to clone. Specific versions can be acquired by space separated addition of:")
+        print("    branch=<branc name>: name of branch to clone")
+        print("    commit=<commit>: ID of specific commit to clone (disregards branch if present, however is disregarded itself on use of ALL_NEWEST)")
         print("  --path: Absolute path to roo clone folder (optional, default: os.getcwd())")
+        print("  --version-action: Specifies how to handle repository versioning. Accepted values string or number:")
+        print("    1: USE_TARGET_IF_ARGUMENT_ELSE_NEWEST")
+        print("    2: ALL_NEWEST")
+        print("    3: ALWAYS_USE_TARGET")
         print("  --force: Whether to force clone (optional, default: True)")
         print("  --depth: Clone depth (optional, default: 1)")
         print("")
         sys.exit(1)
     else:
-        # Get CloneInfo
+        # Get clone_info
         url_list = sys.argv[1].split(';')
 
         ## Sanity check url_list
@@ -85,17 +119,31 @@ if __name__ == "__main__":
             print("No URLs provided. Exiting...")
             sys.exit(1)
 
-        ## Parse url list and build CloneInfo_List
-        CloneInfo_List = []
+        # Get version-action argument
+        if "--version-action" in sys.argv:
+            action_index = sys.argv.index("--version-action")
+            if action_index + 1 < len(sys.argv):
+                action_value = sys.argv[action_index + 1]
+                try:
+                    version_action = int(action_value)  # Try parsing as an integer
+                except ValueError:
+                    version_action = action_value  # Treat as a string
+            else:
+                version_action = VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST  # Default value
+        else:
+            version_action = VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST  # Default value
+
+        ## Parse url list and build clone_info_list
+        clone_info_list = []
         for url in url_list:
             url_parts = url.split()
-            url_info = CloneInfo(url=url_parts[0], branch=None, commit=None)
+            url_info = clone_info(url=url_parts[0], branch=None, commit=None)
             for part in url_parts[1:]:
-                if part.startswith('branch='):
-                    url_info = url_info._replace(branch=part[len('branch='):])
-                elif part.startswith('commit='):
-                    url_info = url_info._replace(commit=part[len('commit='):])
-            CloneInfo_List.append(url_info)
+                if part.startswith("branch="):
+                    url_info = url_info._replace(branch=part[len("branch="):])
+                elif part.startswith("commit="):
+                    url_info = url_info._replace(commit=part[len("commit="):])
+            clone_info_list.append(url_info)
 
         # Get path argument
         if "--path" in sys.argv:
@@ -128,4 +176,4 @@ if __name__ == "__main__":
             depth = 1
 
         # Call main
-        main(CloneInfo_List, path=path, force=force, depth=depth)
+        main(clone_info_list, path=path, version_action=version_action, force=force, depth=depth)
