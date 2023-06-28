@@ -1,7 +1,8 @@
 import os
 import subprocess
+import platform
 
-def git_clone(url, path, depth=1, branch=None, commit=None):
+def git_clone(url, path, depth=1, branch=None, commit=None, hide_terminal=True):
     """
     Clone a Git repository from the given URL with optional depth, branch, or commit.
     
@@ -11,6 +12,7 @@ def git_clone(url, path, depth=1, branch=None, commit=None):
         depth (int, optional, default = 1): The depth of the clone (number of commits to include).
         branch (str, optional, default = None): The branch to clone (ignored if commit is specified).
         commit (str, optional, default = None): The commit hash or reference to clone (takes precedence over branch).
+        hide_terminal (boolean, optional, default = True): Run while hiding terminal
     
     Returns:
         bool: True if the clone was successful, False otherwise.
@@ -51,7 +53,16 @@ def git_clone(url, path, depth=1, branch=None, commit=None):
     command.extend([url, path])
     
     try:
-        subprocess.run(command, check=True)
+        if platform.system() == 'Windows' and hide_terminal:
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            subprocess.run(command, check=True, startupinfo=startupinfo)
+        elif platform.system() == 'Darwin' and hide_terminal:
+            script = f'tell application "Terminal" to do script "{subprocess.list2cmdline(command)}"'
+            subprocess.run(['osascript', '-e', script], check=True)
+        else:
+            # For other platforms, fall back to the default behavior (visible terminal)
+            subprocess.run(command, check=True)    
         return True
     except subprocess.CalledProcessError:
         return False

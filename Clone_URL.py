@@ -24,11 +24,11 @@ def git_clone_url(url, path=None, force=True, depth=1, branch=None, commit=None)
         bool: True if the clone was successful, False otherwise.
     """
     # Print header
-    print(f"Clone {url}")
+    print(f"  Clone {url}")
     
     # Sanity check for a valid URL
     if not url.startswith('http'):
-        print(f"  Invalid URL: {url}")
+        print(f"    Invalid URL: {url}")
         return False
 
     # Handle path parameter
@@ -45,21 +45,21 @@ def git_clone_url(url, path=None, force=True, depth=1, branch=None, commit=None)
             # Removal using rmdir (note: shutil.rmtree does not have required access)
             command = ["rmdir", repo_path, "/s", "/q"]
             subprocess.run(command, shell=True)
-            print(f"  Forced removal of: {repo_name}")
+            print(f"    Forced removal of: {repo_name}")
         except subprocess.CalledProcessError as e:
-            print(f"  Forced removal failure for: {repo_name}")
+            print(f"    Forced removal failure for: {repo_name}")
             return False
     elif os.path.exists(repo_path) and not force:
-        print(f"  Repository already exists, clone skipped: {repo_name}")
+        print(f"    Repository already exists, clone skipped: {repo_name}")
         return True
 
     # Call clone action
     success = git_clone(url, repo_path, depth, branch, commit)
 
     if success:
-        print(f"  Successfully cloned repository: {repo_name}")
+        print(f"    Successfully cloned repository: {repo_name}")
     else:
-        print(f"  Failed to clone repository: {repo_name}")
+        print(f"    Failed to clone repository: {repo_name}")
     return clone_result(path=repo_path, status=success)
 
 def extract_repo_name(url):

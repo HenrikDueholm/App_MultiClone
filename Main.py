@@ -5,7 +5,8 @@
 # Define named tuple types
 from collections import namedtuple
 
-clone_info = namedtuple("clone_info", ["url", "branch", "commit"])
+clone_request = namedtuple("clone_request", ["url", "branch", "commit"])
+clone_info = namedtuple("clone_info", ["url", "branch", "commit", "clone_attempted", "clone_status", "clone_path"])
 
 # Define enums
 from enum import Enum, auto
@@ -25,12 +26,12 @@ from App_MultiClone.Clone_URL import git_clone_url
 from App_MultiClone.Clone_URL import clone_result
 
 # Main
-def main(clone_info_list, path=None, version_action=VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST, force=True, depth=1):
+def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST, force=True, depth=1):
     """
     Main function to perform the cloning process.
 
     Args:
-        clone_info_list (list): List of clone_info objects. Use space separated branch= or commit= to specify specific target version.
+        clone_request_list (list): List of clone_request objects. Use space separated branch= or commit= to specify specific target version.
         path (str, optional, default = os.getcwd()): The absolute clone target path.
         version_action (VersionAction, optional): Version action to perform. Default is USE_TARGET_IF_ARGUMENT_ELSE_NEWEST.
         force (bool, optional): Whether to force removal of existing repositories. Default is True.
@@ -58,36 +59,65 @@ def main(clone_info_list, path=None, version_action=VersionAction.USE_TARGET_IF_
     sub_path = os.path.join(path, "sub")
     if not os.path.exists(sub_path):
         os.makedirs(sub_path)
-    print("Clone folders:")
+    print("Create target folders:")
     print(f"  Main: {main_path}")
     print(f"  Sub: {sub_path}")
     print("")
 
+    # Parse clone_request_list into a clone_info_list
+    clone_info_list = []
+    clone_url_list = []
+    for request in clone_request_list:
+        clone_info_element = clone_info(url=request.url, branch=request.branch, commit=request.commit, clone_attempted=False, clone_status=False, clone_path=None)
+        clone_info_list.append(clone_info_element)    
+        clone_url_list.append(request.url)
+    
     # Pre-clone handling of VersionAction.ALL_NEWEST
     if version_action == VersionAction.ALL_NEWEST:
-        for i, clone_info in enumerate(clone_info_list):
-            if clone_info.branch and clone_info.branch.startswith("tags/"): #Tag disregarded
-                clone_info_list[i] = clone_info._replace(branch=None)
-            if clone_info.commit: #Commit disregarded
-                clone_info_list[i] = clone_info._replace(commit=None)
+        for i, info in enumerate(clone_info_list):
+            if info.branch and info.branch.startswith("tags/"): #Tag disregarded
+                clone_info_list[i] = info._replace(branch=None)
+            if info.commit: #Commit disregarded
+                clone_info_list[i] = info._replace(commit=None)
 
-    # Clone
-    paths = []
-    results = []
-    for clone_info in clone_info_list:
-        clone_result = git_clone_url(clone_info.url, path=main_path, force=force, depth=depth, branch=clone_info.branch, commit=clone_info.commit)
-        paths.append(clone_result.path)
-        results.append(clone_result.status)
+    # Requested clone
+    print("Clone requested repositories:")
+    clone_info_list = execute_clone(clone_info_list, get_dependencies=False, main_path=main_path, force=force, depth=depth, version_action=version_action)
+    
+    # Build boolean status array
+    status_array = []
+    for info in clone_info_list:
+        status_array.append(info.clone_status)
 
-    # Result evaluation
-    print("")
-    print("Result evaluation:")
-    if all(results):
-        print("  All clone operations were successful")
+    # Initial result evaluation
+    if all(status_array):
+        print("Requested clone operations successful, check for dependencies")
+    elif any(status_array):
+        print("Some clone operations failed, check for dependencies")
     else:
-        print("  Some clone operations failed")
+        print("All clone operations failed - Abort")
+        sys.exit(1)
     print("")
-    return results
+    
+    print("Clone dependencies:")
+   
+    print("  Not yet implemented... sorry")
+    
+    result = all(status_array)
+    return result
+
+#####################################################################################################
+# Functions #########################################################################################
+#####################################################################################################
+
+def execute_clone(clone_info_list, get_dependencies=True, main_path=None, force=None, depth=1, version_action=None):
+    for i, info in enumerate(clone_info_list):
+        if not info.clone_attempted:
+            info = info._replace(clone_attempted=True)
+            clone_result = git_clone_url(info.url, path=main_path, force=force, depth=depth, branch=info.branch, commit=info.commit)
+            info = info._replace(clone_status=clone_result.status, clone_path=clone_result.path)
+            clone_info_list[i] = info
+    return clone_info_list
 
 #####################################################################################################
 # CLI ###############################################################################################
@@ -133,8 +163,8 @@ if __name__ == "__main__":
         else:
             version_action = VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST  # Default value
 
-        ## Parse url list and build clone_info_list
-        clone_info_list = []
+        ## Parse url list and build clone_request_list
+        clone_request_list = []
         for url in url_list:
             url_parts = url.split()
             url_info = clone_info(url=url_parts[0], branch=None, commit=None)
@@ -143,7 +173,7 @@ if __name__ == "__main__":
                     url_info = url_info._replace(branch=part[len("branch="):])
                 elif part.startswith("commit="):
                     url_info = url_info._replace(commit=part[len("commit="):])
-            clone_info_list.append(url_info)
+            clone_request_list.append(url_info)
 
         # Get path argument
         if "--path" in sys.argv:
@@ -176,4 +206,4 @@ if __name__ == "__main__":
             depth = 1
 
         # Call main
-        main(clone_info_list, path=path, version_action=version_action, force=force, depth=depth)
+        main(clone_request_list, path=path, version_action=version_action, force=force, depth=depth)
