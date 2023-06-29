@@ -1,5 +1,5 @@
-from App_MultiClone.Main import main
-from App_MultiClone.Main import clone_request
+from App_MultiClone.main import main
+from App_MultiClone.main import clone_request
 
 clone_request_list = []
 url = 'https://github.com/HenrikDueholm/LV32.2020..PPL.HDH.Driver.DMM'
@@ -11,5 +11,4 @@ clone_request_list.append(info)
 
 path = "C:\Current projects\Python\Test"
 
-main(clone_request_list, path=path, force=True, depth=1)
-
+main(clone_request_list, path=path, force=False, depth=1)

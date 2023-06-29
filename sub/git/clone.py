@@ -56,7 +56,7 @@ def git_clone(url, path, depth=1, branch=None, commit=None, hide_terminal=True):
         if platform.system() == 'Windows' and hide_terminal:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            subprocess.run(command, check=True, startupinfo=startupinfo)
+            subprocess.run(command, check=True, startupinfo=startupinfo, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         elif platform.system() == 'Darwin' and hide_terminal:
             script = f'tell application "Terminal" to do script "{subprocess.list2cmdline(command)}"'
             subprocess.run(['osascript', '-e', script], check=True)
@@ -64,5 +64,9 @@ def git_clone(url, path, depth=1, branch=None, commit=None, hide_terminal=True):
             # For other platforms, fall back to the default behavior (visible terminal)
             subprocess.run(command, check=True)    
         return True
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
+        # Handle the error
+        stderr_output = e.stderr.decode("utf-8")  # Decode the stderr output
+        print("Error occurred:")
+        print(stderr_output)
         return False

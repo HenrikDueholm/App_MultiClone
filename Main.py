@@ -22,8 +22,11 @@ class VersionAction(Enum):
 import sys
 import os
 
-from App_MultiClone.Clone_URL import git_clone_url
-from App_MultiClone.Clone_URL import clone_result
+import App_MultiClone.globals
+
+from App_MultiClone.sub.clone_url import git_clone_url
+from App_MultiClone.sub.clone_url import clone_result
+from App_MultiClone.sub.post_clone_handler import repository_action
 
 # Main
 def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST, force=True, depth=1):
@@ -76,9 +79,9 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
     # Pre-clone handling of VersionAction.ALL_NEWEST
     if version_action == VersionAction.ALL_NEWEST:
         for i, info in enumerate(clone_info_list):
-            if info.branch and info.branch.startswith("tags/"): #Tag disregarded
+            if info.branch and info.branch.startswith("tags/"):  # Tag disregarded
                 clone_info_list[i] = info._replace(branch=None)
-            if info.commit: #Commit disregarded
+            if info.commit:  # Commit disregarded
                 clone_info_list[i] = info._replace(commit=None)
 
     # Requested clone
@@ -117,14 +120,23 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
                 clone_attempted_array.append(info.clone_attempted)
             all_done = all(clone_attempted_array)
 
-        ## Result evaluation
+        # Result evaluation
         status_array = []
         for info in clone_info_list:
-            status_array.append(info.clone_status)        
+            status_array.append(info.clone_status)
         if status_array and all(status_array):
             print("All dependency clone operations successful")
         elif status_array and any(status_array):
             print("Some clone operations failed")
+        print("")
+
+    # Post clone action handling
+    path_array = []
+    for info in clone_info_list:
+        if info.clone_status:
+            path_array.append(info.clone_path)
+    repository_action(paths=path_array)
+
         
     result = all(status_array)
     return result
@@ -158,11 +170,11 @@ def string_to_clone_elements(string, delimiter=";", version_action=None):
             if part.startswith("branch="):
                 branch_name = part[len("branch="):]
                 is_branch = not branch_name.startswith("tags/")
-                if is_branch: #never skip branch
+                if is_branch:  # never skip branch
                     url_info = url_info._replace(branch=branch_name) 
-                elif not get_newest: #skip tag if get newest
+                elif not get_newest:  # skip tag if get newest
                     url_info = url_info._replace(branch=branch_name)
-            elif part.startswith("commit=") and not get_newest: #skip commit getting newest
+            elif part.startswith("commit=") and not get_newest:  # skip commit getting newest
                 url_info = url_info._replace(commit=part[len("commit="):])
         clone_request_list.append(url_info)
         
