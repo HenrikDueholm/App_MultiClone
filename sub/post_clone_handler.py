@@ -3,7 +3,7 @@ import pkgutil
 import inspect
 import os
 
-from App_MultiClone.globals import globals_object
+from globals import globals_object
 
 #####################################################################################################
 # Core ##############################################################################################
@@ -27,24 +27,35 @@ def repository_action(paths, action_source=".postcloneactions", plugin_folders=N
     summary_array = []
     for path in paths:
         path_clone_actions = os.path.join(path, action_source)
-        # If ".postcloneactions" is found
+
+        # Action_source found?
         if os.path.exists(path_clone_actions):
             action_array = []
             status_array = []
-            action_content = None
+
             # Load post clone actions
             with open(path_clone_actions, 'r') as file:
                 action_content = file.read()
             if action_content:
+                globals_object.pca_initialize(path)  # Reset and initialize global post clone action data
+                repo_name = os.path.basename(path)
+                print(f"  {repo_name}: {action_source}")
+
                 action_array = action_content.split("\n")
                 for action in action_array:
                     try:
                         action_status = run_plugin(plugin_map,action)
                     except TypeError:
                         action_status = False
-                    status_array.append(action_status)
 
-                    action_status = run_plugin(plugin_map,action)
+                    status_array.append(action_status)
+                    if not action_status and globals_object.action_log:
+                        print("    Action failure encountered - dump log:")
+                        for log_element in globals_object.action_log:
+                            print(f"      {log_element}")
+                    elif not action_status:
+                        print("    Action failure encountered")
+
             summary_array.append(all(status_array))
         else:
             summary_array.append(True)

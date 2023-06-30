@@ -1,34 +1,38 @@
 #####################################################################################################
-# Defines ###########################################################################################
+# Import ############################################################################################
+#####################################################################################################
+
+# System
+import sys
+import os
+
+from collections import namedtuple
+from enum import Enum, auto
+
+# Non-system
+from globals import globals_object
+
+from sub.clone_url import git_clone_url, clone_result
+from sub.post_clone_handler import repository_action
+
+#####################################################################################################
+# Define ############################################################################################
 #####################################################################################################
 
 # Define named tuple types
-from collections import namedtuple
-
 clone_request = namedtuple("clone_request", ["url", "branch", "commit"])
 clone_info = namedtuple("clone_info", ["url", "branch", "commit", "clone_attempted", "clone_status", "clone_path"])
 
 # Define enums
-from enum import Enum, auto
-
 class VersionAction(Enum):
-    USE_TARGET_IF_ARGUMENT_ELSE_NEWEST = auto() #Default
+    USE_TARGET_IF_ARGUMENT_ELSE_NEWEST = auto()  # Default
     ALL_NEWEST = auto()
     ALWAYS_USE_TARGET = auto()
 
 #####################################################################################################
-# Core ##############################################################################################
+# main ##############################################################################################
 #####################################################################################################
-import sys
-import os
 
-import App_MultiClone.globals
-
-from App_MultiClone.sub.clone_url import git_clone_url
-from App_MultiClone.sub.clone_url import clone_result
-from App_MultiClone.sub.post_clone_handler import repository_action
-
-# Main
 def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST, force=True, depth=1):
     """
     Main function to perform the cloning process. When all provided elements have been cloned each repository will be searched (in order) for content of ".dependencies".
@@ -68,6 +72,11 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
     print(f"  Main: {main_path}")
     print(f"  Sub: {sub_path}")
     print("")
+
+    # Populate global
+    globals_object.path_main = main_path
+    globals_object.path_sub = sub_path
+    globals_object.force = force
 
     # Parse clone_request_list into a clone_info_list
     clone_info_list = []
@@ -135,8 +144,11 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
     for info in clone_info_list:
         if info.clone_status:
             path_array.append(info.clone_path)
-    repository_action(paths=path_array)
 
+    print("Run repository post clone actions:")
+    repository_action(paths=path_array, action_source=".postcloneactions_initial", plugin_folders=None)  # ToDo: Add plugin_folders config (external config?)
+    repository_action(paths=path_array, action_source=".postcloneactions", plugin_folders=None)  # ToDo: Add plugin_folders config (external config?)
+    repository_action(paths=path_array, action_source=".postcloneactions_final", plugin_folders=None)  # ToDo: Add plugin_folders config (external config?)
         
     result = all(status_array)
     return result

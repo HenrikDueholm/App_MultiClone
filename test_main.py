@@ -1,5 +1,5 @@
-from App_MultiClone.main import main
-from App_MultiClone.main import clone_request
+from main import main
+from main import clone_request
 
 clone_request_list = []
 url = 'https://github.com/HenrikDueholm/LV32.2020..PPL.HDH.Driver.DMM'
