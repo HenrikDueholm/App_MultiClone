@@ -14,7 +14,7 @@ class GlobalVariables:
 
         # Execution variables - Paths
         self.path_main = None
-        self.path_sub = None
+        self.path_source = None
 
         # Execution variables - Config
         self.force = None

@@ -4,9 +4,125 @@ import inspect
 import os
 
 from globals import globals_object
+from clone_actions.action_link_to_main import Action_LinkToMain
 
 #####################################################################################################
 # Core ##############################################################################################
+#####################################################################################################
+
+def post_clone_action_handler(paths, plugin_folders=None):
+
+    # Check for any clone actions, link to main if none are found
+    paths_with_action_initial = []
+    paths_with_action = []
+    paths_with_action_final = []
+    paths_with_action_any = []
+    paths_with_no_action = []
+    link_status_array = []
+
+    for path in paths:
+        path_action_initial = os.path.join(path, ".postcloneactions_initial")
+        path_action = os.path.join(path, ".postcloneactions")
+        path_action_final = os.path.join(path, ".postcloneactions_final")
+
+        action_found = False
+
+        if os.path.exists(path_action_initial):
+            paths_with_action_initial.append(path_action_initial)
+            action_found = True
+
+        if os.path.exists(path_action):
+            paths_with_action.append(path_action)
+            action_found = True
+
+        if os.path.exists(path_action_final):
+            paths_with_action_final.append(path_action_final)
+            action_found = True
+
+        if not action_found:
+            paths_with_no_action.append(path)
+        else:
+            paths_with_action_any.append(path)
+
+    if paths_with_no_action:
+        print("Link non-action repositories to main")
+        for path in paths_with_no_action:
+            # Link repository to main
+            globals_object.pca_initialize(path)  # Populate global with current path
+            link_object = Action_LinkToMain()
+            link_status = link_object.action()
+            link_status_array.append(link_status)
+            if not link_status and globals_object.action_log:
+                print("  Linking failure encountered - Log:")
+                for log_element in globals_object.action_log:
+                    print(f"    {log_element}")
+            elif not link_status:
+                print("  Linking failure encountered")
+
+    if paths_with_action_any:
+        any_actions_found = True
+        # At least one path contains actions, handled in individual cases
+    elif not paths_with_action_any and all(link_status_array):
+        print("All repositories successfully linked to main")
+        print("")
+        return True
+    elif not paths_with_action_any and not all(link_status_array):
+        print("No clone actions detected - Not all repositories successfully linked to main!")
+        print("")
+        return False
+
+    # Initial action
+    action_initial_status = True
+    if paths_with_action_initial:
+        print("Run initial repository post clone actions:")
+        # ToDo: Add plugin_folders config (external config?)
+        action_initial_status = repository_action(
+            paths=paths_with_action_initial,
+            action_source=".postcloneactions_initial",
+            plugin_folders=plugin_folders
+        )
+        if action_initial_status:
+            print("Initial post clone actions run successfully")
+        else:
+            print("Initial post clone actions did not all run successfully")
+        print("")
+
+    # Action
+    action_status = True
+    if paths_with_action:
+        print("Run repository post clone actions:")
+        # ToDo: Add plugin_folders config (external config?)
+        action_status = repository_action(
+            paths=paths_with_action,
+            action_source=".postcloneactions",
+            plugin_folders=plugin_folders
+        )
+        if action_status:
+            print("Post clone actions run successfully")
+        else:
+            print("Post clone actions did not all run successfully")
+        print("")
+
+    # Final action
+    action_final_status = True
+    if paths_with_action_final:
+        print("Run final repository post clone actions:")
+        # ToDo: Add plugin_folders config (external config?)
+        action_final_status = repository_action(
+            paths=paths_with_action_final,
+            action_source=".postcloneactions_final",
+            plugin_folders=plugin_folders
+        )
+        if action_final_status:
+            print("Final post clone actions run successfully")
+        else:
+            print("Final post clone actions did not all run successfully")
+        print("")
+
+    return action_initial_status and action_status and action_final_status
+
+#####################################################################################################
+# Functions #########################################################################################
 #####################################################################################################
 
 def repository_action(paths, action_source=".postcloneactions", plugin_folders=None):
@@ -18,7 +134,6 @@ def repository_action(paths, action_source=".postcloneactions", plugin_folders=N
         action_source (str, optional, default = ".postcloneactions": The file name to load actions from in the repository root.
         plugin_folders (str, optional, default = None: Path or path array to folders containing plugin actions.
 
-    Returns:
     """
     # ToDo: Add print
     plugin_map = load_plugins(plugin_folders=plugin_folders)
@@ -59,12 +174,8 @@ def repository_action(paths, action_source=".postcloneactions", plugin_folders=N
             summary_array.append(all(status_array))
         else:
             summary_array.append(True)
-    return None
 
-
-#####################################################################################################
-# Functions #########################################################################################
-#####################################################################################################
+    return all(summary_array)
 
 def load_plugins(plugin_folders=None):
     # ToDo: Add documentation

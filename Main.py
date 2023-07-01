@@ -13,7 +13,7 @@ from enum import Enum, auto
 from globals import globals_object
 
 from sub.clone_url import git_clone_url, clone_result
-from sub.post_clone_handler import repository_action
+from sub.post_clone_handler import post_clone_action_handler
 
 #####################################################################################################
 # Define ############################################################################################
@@ -33,7 +33,8 @@ class VersionAction(Enum):
 # main ##############################################################################################
 #####################################################################################################
 
-def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST, force=True, depth=1):
+def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST,
+         force=True, depth=1):
     """
     Main function to perform the cloning process. When all provided elements have been cloned each repository will be searched (in order) for content of ".dependencies".
     ".dependencies". should be formatted as the clone_request_list using linefeed instead of ";".
@@ -62,20 +63,20 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
     print("")
 
     # Create clone folders
-    main_path = os.path.join(path, "main")
-    if not os.path.exists(main_path):
-        os.makedirs(main_path)
-    sub_path = os.path.join(path, "sub")
-    if not os.path.exists(sub_path):
-        os.makedirs(sub_path)
+    path_main = os.path.join(path, "main")
+    if not os.path.exists(path_main):
+        os.makedirs(path_main)
+    path_source = os.path.join(path, "source")
+    if not os.path.exists(path_source):
+        os.makedirs(path_source)
     print("Create target folders:")
-    print(f"  Main: {main_path}")
-    print(f"  Sub: {sub_path}")
+    print(f"  Main: {path_main}")
+    print(f"  Source: {path_source}")
     print("")
 
     # Populate global
-    globals_object.path_main = main_path
-    globals_object.path_sub = sub_path
+    globals_object.path_main = path_main
+    globals_object.path_source = path_source
     globals_object.force = force
 
     # Parse clone_request_list into a clone_info_list
@@ -95,7 +96,8 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
 
     # Requested clone
     print("Clone requested repositories:")
-    clone_info_list = execute_clone(clone_info_list, main_path=main_path, version_action=version_action, force=force, depth=depth)
+    clone_info_list = execute_clone(clone_info_list, path_source=path_source, version_action=version_action,
+                                    force=force, depth=depth)
     
     # Build boolean status array
     status_array = []
@@ -117,13 +119,14 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
         print("No clone operations performed - Abort")
         sys.exit(1)
     print("")
-    
     # Clone dependencies
+
     if not all(clone_attempted_array):
         print("Clone dependencies:")
         all_done = False
         while not all_done:
-            clone_info_list = execute_clone(clone_info_list, main_path=main_path, version_action=version_action, force=force, depth=depth)
+            clone_info_list = execute_clone(clone_info_list, path_source=path_source, version_action=version_action,
+                                            force=force, depth=depth)
             clone_attempted_array = []
             for info in clone_info_list:
                 clone_attempted_array.append(info.clone_attempted)
@@ -139,19 +142,18 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
             print("Some clone operations failed")
         print("")
 
+        clone_action_result = all(status_array)
+
     # Post clone action handling
     path_array = []
     for info in clone_info_list:
         if info.clone_status:
             path_array.append(info.clone_path)
 
-    print("Run repository post clone actions:")
-    repository_action(paths=path_array, action_source=".postcloneactions_initial", plugin_folders=None)  # ToDo: Add plugin_folders config (external config?)
-    repository_action(paths=path_array, action_source=".postcloneactions", plugin_folders=None)  # ToDo: Add plugin_folders config (external config?)
-    repository_action(paths=path_array, action_source=".postcloneactions_final", plugin_folders=None)  # ToDo: Add plugin_folders config (external config?)
-        
-    result = all(status_array)
-    return result
+    action_result = post_clone_action_handler(path_array, plugin_folders=None)  # ToDo:
+    # Add plugin_folders config (external config?)
+
+    return clone_action_result and action_result
 
 #####################################################################################################
 # Functions #########################################################################################
@@ -164,13 +166,15 @@ def string_to_clone_elements(string, delimiter=";", version_action=None):
     Args:
         string (str): string to parse into clone_request_list.
         delimiter (str, optional, default = ";"): Delimiter used to split clone_info elements.
-        version_action (VersionAction, optional, default=None): Version action use on parsed string. Filtering disabled if None.
+        version_action (VersionAction, optional, default=None): Version action use on parsed string.
+            Filtering disabled if None.
 
     Returns:
         clone_request_list (clone_info array) : List of clone_info elements.
     """
     
-    get_newest = ( version_action == VersionAction.ALL_NEWEST or version_action == VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST )
+    get_newest = ( version_action == VersionAction.ALL_NEWEST or
+                   version_action == VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST )
     
     clone_request_list = []
     url_list = string.split(delimiter)
@@ -203,16 +207,17 @@ def clone_request_to_info_element(request):
         clone_info
     """
     
-    clone_info_element = clone_info(url=request.url, branch=request.branch, commit=request.commit, clone_attempted=False, clone_status=False, clone_path=None)
+    clone_info_element = clone_info(url=request.url, branch=request.branch, commit=request.commit,
+                                    clone_attempted=False, clone_status=False, clone_path=None)
     return clone_info_element
 
-def execute_clone(clone_info_list, main_path, version_action, force=False, depth=1):
+def execute_clone(clone_info_list, path_source, version_action, force=False, depth=1):
     """
     Clone .
 
     Args:
         clone_info_list (clone_info array) : List of clone_info elements to clone.
-        main_path (str): Path to the clone target.
+        path_source (str): Path to the clone target.
         version_action (VersionAction): Version action to perform. Only in use when getting dependencies.
         force (bool, optional, default=False): Whether to force removal of existing repositories. Default is True.
         depth (int, optional, default=1): The depth of the clone (number of commits to include). Default is 1.
@@ -232,7 +237,8 @@ def execute_clone(clone_info_list, main_path, version_action, force=False, depth
     for i, info in enumerate(clone_info_list):
         if not info.clone_attempted:
             info = info._replace(clone_attempted=True)
-            clone_result = git_clone_url(info.url, path=main_path, force=force, depth=depth, branch=info.branch, commit=info.commit)
+            clone_result = git_clone_url(info.url, path=path_source, force=force, depth=depth, branch=info.branch,
+                                         commit=info.commit)
             clone_status = clone_result.status
             clone_path = clone_result.path
             clone_dependencies_path = os.path.join(clone_path, ".dependencies")
@@ -242,7 +248,8 @@ def execute_clone(clone_info_list, main_path, version_action, force=False, depth
                 # Load dependencies
                 with open(clone_dependencies_path, 'r') as file:
                     dependencies_content = file.read()
-                dependency_clone_request_list = string_to_clone_elements(dependencies_content, delimiter="\n", version_action=version_action)
+                dependency_clone_request_list = string_to_clone_elements(dependencies_content, delimiter="\n",
+                                                                         version_action=version_action)
                 for request in dependency_clone_request_list:
                     if request.url not in url_array:
                         clone_info_list_addition.append(clone_request_to_info_element(request))

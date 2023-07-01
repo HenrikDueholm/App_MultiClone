@@ -11,4 +11,4 @@ clone_request_list.append(info)
 
 path = "C:\Current projects\Python\Test"
 
-main(clone_request_list, path=path, force=False, depth=1)
+main(clone_request_list, path=path, force=True, depth=1)
