@@ -22,13 +22,15 @@ class GlobalVariables:
         # Post clone action variables
         self.action_repo_path = None
         self.action_repo_name = None
+        self.action_data = None
         self.action_log = []
         self.action_variable_map = {}
 
     # Post clone action (pca) methods
-    def pca_initialize(self, repo_path):
+    def pca_initialize(self, repo_path, action_data=None):
         self.action_repo_path = repo_path
         self.action_repo_name = os.path.basename(repo_path)
+        self.action_data = action_data
         self.action_log = []
         self.action_variable_map = {}
 

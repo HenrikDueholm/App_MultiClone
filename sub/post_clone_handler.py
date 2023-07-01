@@ -1,7 +1,7 @@
 import importlib
-import pkgutil
 import inspect
 import os
+import sys
 
 from globals import globals_object
 from clone_actions.action_link_to_main import Action_LinkToMain
@@ -28,15 +28,15 @@ def post_clone_action_handler(paths, plugin_folders=None):
         action_found = False
 
         if os.path.exists(path_action_initial):
-            paths_with_action_initial.append(path_action_initial)
+            paths_with_action_initial.append(path)
             action_found = True
 
         if os.path.exists(path_action):
-            paths_with_action.append(path_action)
+            paths_with_action.append(path)
             action_found = True
 
         if os.path.exists(path_action_final):
-            paths_with_action_final.append(path_action_final)
+            paths_with_action_final.append(path)
             action_found = True
 
         if not action_found:
@@ -63,7 +63,7 @@ def post_clone_action_handler(paths, plugin_folders=None):
         any_actions_found = True
         # At least one path contains actions, handled in individual cases
     elif not paths_with_action_any and all(link_status_array):
-        print("All repositories successfully linked to main")
+        print("No failures during link actions")
         print("")
         return True
     elif not paths_with_action_any and not all(link_status_array):
@@ -152,14 +152,13 @@ def repository_action(paths, action_source=".postcloneactions", plugin_folders=N
             with open(path_clone_actions, 'r') as file:
                 action_content = file.read()
             if action_content:
-                globals_object.pca_initialize(path)  # Reset and initialize global post clone action data
                 repo_name = os.path.basename(path)
                 print(f"  {repo_name}: {action_source}")
 
-                action_array = action_content.split("\n")
+                action_array = action_content.split("\n",)
                 for action in action_array:
                     try:
-                        action_status = run_plugin(plugin_map,action)
+                        action_status = run_plugin(plugin_map, action, path)
                     except TypeError:
                         action_status = False
 
@@ -196,7 +195,11 @@ def load_plugins(plugin_folders=None):
     # Get a list of Python files in the folder
     files = []
     for folder in plugin_folders:
-        files.extend([name for _, name, _ in pkgutil.iter_modules([folder]) if name.endswith('.py')])
+        if os.path.isdir(folder):
+            # Add the module directory to the beginning of sys.path
+            sys.path.insert(0, str(folder))
+            # Get py files in folder
+            files.extend([name for name in os.listdir(folder) if name.endswith(".py")])
     files = list(set(files))  # remove duplicate files
 
     plugin_map = {}
@@ -213,7 +216,7 @@ def load_plugins(plugin_folders=None):
 
     return plugin_map
 
-def run_plugin(plugin_map, plugin_string):
+def run_plugin(plugin_map, plugin_string, repo_path):
     # ToDo: Add documentation
     plugin_split = plugin_string.split(" ", 1)
     plugin_name = plugin_split[0]
@@ -229,34 +232,14 @@ def run_plugin(plugin_map, plugin_string):
         # ToDo: Add print
         return False
 
-    # Call reset if it found
-    reset_status = True
-    if hasattr(plugin_object(), "reset") and callable(getattr(plugin_object(), "reset")):
-        try:
-            reset_status = plugin_object.reset()
-            if not isinstance(reset_status, bool):
-                raise TypeError("reset() method must return a boolean value")
-        except TypeError:
-            reset_status = False
-
-    # Call populate if it found
-    populate_status = True
-    if hasattr(plugin_object(), "populate") and callable(getattr(plugin_object(), "populate")):
-        try:
-            populate_status = plugin_object.populate(plugin_data)
-            if not isinstance(populate_status, bool):
-                raise TypeError("populate() method must return a boolean value")
-        except TypeError:
-            populate_status = False
-
     # Call action
     action_status = False
-    if reset_status and populate_status:
-        try:
-            action_status = plugin_object.action()
-            if not isinstance(action_status, bool):
-                raise TypeError("action() method must return a boolean value")
-        except TypeError:
-            action_status = False
+    try:
+        globals_object.pca_initialize(repo_path, plugin_data)  # Reset and initialize global post clone action data
+        action_status = plugin_object.action()
+        if not isinstance(action_status, bool):
+            raise TypeError("action() method must return a boolean value")
+    except TypeError:
+        action_status = False
 
     return action_status
