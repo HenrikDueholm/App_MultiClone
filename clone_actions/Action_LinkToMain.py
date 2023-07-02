@@ -26,8 +26,7 @@ class Action_LinkToMain:
 
         if deletion_status and not os.path.exists(destination_path):
             try:
-                # Action to take
-                os.symlink(source_path, destination_path)  # Replace with
+                os.symlink(source_path, destination_path)
                 status = True
                 log_string = f"{indentation}Soft link created: {destination_path} -> {source_path}"
             except OSError as e:

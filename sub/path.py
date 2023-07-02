@@ -13,3 +13,11 @@ def delete_path_if_force(path):
             return False
 
     return True
+
+def sanity_check_path(path):
+    if path is None:
+        return False
+    for char in path:
+        if char in '/?%*|"<>':
+            return False
+    return True

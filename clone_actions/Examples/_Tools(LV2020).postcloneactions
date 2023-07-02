@@ -1,0 +1,2 @@
+Action_CreateFolder %ProgramFiles%\National Instruments\LabVIEW 2020\user.lib\_Tools
+Action_LinkToFolder %ProgramFiles%\National Instruments\LabVIEW 2020\user.lib\_Tools

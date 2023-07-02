@@ -1,0 +1,6 @@
+Action_CreateMainFolder [TestStand Public]
+Action_CreateMainFolder [TestStand User]
+Action_CreateMainFolder [TestStand]
+Action_LinkContentStructureToFolder source=[TestStand Public];target=[TestStand Public]
+Action_LinkContentStructureToFolder source=[TestStand User];target=[TestStand User]
+Action_LinkContentStructureToFolder source=[TestStand];target=[TestStand]

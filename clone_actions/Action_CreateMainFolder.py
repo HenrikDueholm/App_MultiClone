@@ -2,6 +2,7 @@
 import os
 
 from globals import globals_object
+from sub.path import sanity_check_path
 
 ########################################################################################################################
 # Action_CreateMainFolder ##############################################################################################
@@ -24,7 +25,7 @@ class Action_CreateMainFolder:
         main_path = globals_object.path_main
 
         # Sanity check path
-        if not path or not all(char not in '/?%*:|"<>.' for char in path):
+        if not sanity_check_path(path):
             return False
 
         # Setup variables

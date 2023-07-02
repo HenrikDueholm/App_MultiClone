@@ -2,7 +2,7 @@
 import os
 
 from globals import globals_object
-from sub.path import delete_path_if_force
+from sub.path import sanity_check_path
 
 ########################################################################################################################
 # Action_CreateFolder ##################################################################################################
@@ -34,7 +34,7 @@ class Action_CreateFolder:
             expanded_path = path
 
         # Sanity check path
-        if not expanded_path or not all(char not in '/?%*:|"<>.' for char in expanded_path):
+        if not sanity_check_path(expanded_path):
             return False
 
         # Append to main if relative path

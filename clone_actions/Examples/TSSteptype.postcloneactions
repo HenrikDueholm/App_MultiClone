@@ -1,0 +1,5 @@
+Action_LinkToMain
+Action_CreateMainFolder [TestStand Public]\Components\TypePalettes
+Action_CreateMainFolder [TestStand Public]\Components\Icons
+Action_LinkContentStructureToFolder source=_TypePalettes;target=[TestStand Public]\Components\TypePalettes
+Action_LinkContentStructureToFolder source=_Icons;target=[TestStand Public]\Components\Icons
