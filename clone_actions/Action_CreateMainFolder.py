@@ -1,16 +1,23 @@
-"""
-Create a main folder.
-
-Returns:
-    status (boolean): True if folder created or already found.
-"""
 # Imports
 import os
 
 from globals import globals_object
 from sub.path import delete_path_if_force
 
-# Class: Action_LinkToMain
+########################################################################################################################
+# Action_CreateMainFolder ##############################################################################################
+########################################################################################################################
+
+"""
+Create a folder in main.
+
+action_data:
+    path (str): Relative path that will be joined with main.
+
+Returns:
+    status (boolean): True if folder created or already found.
+"""
+
 class Action_CreateMainFolder:
     def action(self):
         # Get global data
@@ -18,7 +25,7 @@ class Action_CreateMainFolder:
         main_path = globals_object.path_main
 
         # Sanity check path
-        if not path or not all(char not in '/\\?%*:|"<>.' for char in path):
+        if not path or not all(char not in '/?%*:|"<>.' for char in path):
             return False
 
         # Setup variables

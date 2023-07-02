@@ -4,7 +4,7 @@ import os
 import sys
 
 from globals import globals_object
-from clone_actions.action_link_to_main import Action_LinkToMain
+from clone_actions.Action_LinkToMain import Action_LinkToMain
 
 #####################################################################################################
 # Core ##############################################################################################
@@ -218,7 +218,7 @@ def load_plugins(plugin_folders=None):
 
 def run_plugin(plugin_map, plugin_string, repo_path):
     # ToDo: Add documentation
-    plugin_split = plugin_string.split(" ", 1)
+    plugin_split = plugin_string.split(" ", 1)  # Get name by splitting ón first space.
     plugin_name = plugin_split[0]
     if len(plugin_split) > 1:
         plugin_data = plugin_split[1]

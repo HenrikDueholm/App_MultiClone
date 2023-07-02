@@ -1,20 +1,42 @@
-"""
-Link repository to main.
-
-Returns:
-"""
 # Imports
 import os
 
 from globals import globals_object
 from sub.path import delete_path_if_force
 
-# Class: Action_LinkToMain
-class Action_LinkToMain:
+########################################################################################################################
+# Action_LinkIntoMainSubFolder #########################################################################################
+########################################################################################################################
+
+"""
+Create a repository link into a main sub-folder.
+
+action_data:
+    path (str): Relative path that repository will be linked into as a sub-folder.
+
+Example:
+    repo name: Repo1
+    destination argument: main\asdf\asd2
+    resulting link: main\asdf\asdf2\Repo1
+
+Returns:
+    status (boolean): True if folder linked.
+"""
+
+class Action_LinkIntoMainSubFolder:
     def action(self):
-        # Setup variables
+        # Get global data
+        path = globals_object.action_data
+        repo_name = globals_object.action_repo_name
+        main_path = globals_object.path_main
         source_path = globals_object.action_repo_path
-        destination_path = os.path.join(globals_object.path_main, globals_object.action_repo_name)
+
+        # Sanity check path
+        if not path or not all(char not in '/?%*:|"<>.' for char in path):
+            return False
+
+        # Setup variables
+        destination_path = os.path.join(os.path.join(main_path, path), repo_name)
         indentation = "      "  # Default indentation for post clone actions
 
         deletion_status = delete_path_if_force(destination_path)
