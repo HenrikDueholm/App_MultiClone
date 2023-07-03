@@ -12,9 +12,11 @@ class GlobalVariables:
         # Get the directory containing the default post clone plugins
         self.path_default_clone_actions_directory = os.path.join(self.path_main_directory,"clone_actions")
 
-        # Execution variables - Paths
+        # Execution variables - Path and names
         self.path_main = None
         self.path_source = None
+        self.path_array = []
+        self.repo_name_array = []
 
         # Execution variables - Config
         self.force = None
@@ -42,6 +44,14 @@ class GlobalVariables:
 
     def pca_log_add(self, log_value):
         self.action_log.append(log_value)
+
+    def populate_paths(self, paths):
+        self.path_array = []
+        self.repo_name_array = []
+        for path in paths:
+            self.path_array.append(path)
+            self.repo_name_array.append(os.path.basename(path))
+
 
 # Create an instance of the GlobalVariables class
 globals_object = GlobalVariables()

@@ -19,6 +19,17 @@ from globals import globals_object
 import os
 from globals import globals_object
 
+########################################################################################################################
+# Action_LinkToMain ####################################################################################################
+########################################################################################################################
+
+"""
+Describe what it does.
+
+Returns:
+    status (boolean): True if folder linked.
+"""
+
 class TemplateAction:
     def action(self):
         # Setup variables
@@ -29,7 +40,7 @@ class TemplateAction:
 
             status = True
             log_string = f"{indentation}Success string"
-        except OSError as e:
+        except OSError as e:  # Add error cases as needed
             # Exception handling
             log_string = f"{indentation}Error string: {e}"
             status = False

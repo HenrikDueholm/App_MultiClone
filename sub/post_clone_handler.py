@@ -20,6 +20,10 @@ def post_clone_action_handler(paths, plugin_folders=None):
     paths_with_no_action = []
     link_status_array = []
 
+    # Populate global with source paths
+    globals_object.populate_paths(paths)
+
+    # Look for post clone action types in paths
     for path in paths:
         path_action_initial = os.path.join(path, ".postcloneactions_initial")
         path_action = os.path.join(path, ".postcloneactions")

@@ -14,6 +14,7 @@ from globals import globals_object
 
 from sub.clone_url import git_clone_url, clone_result
 from sub.post_clone_handler import post_clone_action_handler
+from sub.path import build_clone_dependencies_path
 
 #####################################################################################################
 # Define ############################################################################################
@@ -241,7 +242,7 @@ def execute_clone(clone_info_list, path_source, version_action, force=False, dep
                                          commit=info.commit)
             clone_status = clone_result.status
             clone_path = clone_result.path
-            clone_dependencies_path = os.path.join(clone_path, ".dependencies")
+            clone_dependencies_path = build_clone_dependencies_path(clone_path)
             info = info._replace(clone_status=clone_status, clone_path=clone_path)
             clone_info_list[i] = info
             if clone_status and os.path.exists(clone_dependencies_path):
