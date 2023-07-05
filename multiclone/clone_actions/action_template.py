@@ -14,10 +14,7 @@ Global reads:
 Returns:
 """
 
-from globals import globals_object
-
-import os
-from globals import globals_object
+from multiclone.sub.globals import globals_object
 
 ########################################################################################################################
 # Action_LinkToMain ####################################################################################################

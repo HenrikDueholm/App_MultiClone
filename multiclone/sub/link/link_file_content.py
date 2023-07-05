@@ -1,6 +1,6 @@
 import os
 
-from globals import globals_object
+from multiclone.sub.globals import globals_object
 
 def recreate_linked_folder_structure(path_source, path_target, exclusions=None):
     if not os.path.exists(path_source):

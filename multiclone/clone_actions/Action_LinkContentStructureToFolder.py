@@ -1,8 +1,8 @@
 # Imports
 import os
 
-from globals import globals_object
-from sub.link.link_file_content import recreate_linked_folder_structure
+from multiclone.sub.globals import globals_object
+from multiclone.sub.link.link_file_content import recreate_linked_folder_structure
 
 ########################################################################################################################
 # Action_LinkContentStructureToFolder ##################################################################################

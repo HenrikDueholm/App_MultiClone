@@ -1,5 +1,5 @@
-from main import main
-from main import clone_request
+from app_main import main
+from app_main import clone_request
 
 clone_request_list = []
 url = 'https://github.com/HenrikDueholm/LV32.2020..PPL.HDH.Driver.DMM'
@@ -9,6 +9,6 @@ url = 'https://github.com/HenrikDueholm/LV32.2020..PPL.ClassLoader'
 info = clone_request(url=url, branch=None, commit=None)
 clone_request_list.append(info)
 
-path = "C:\Current projects\Python\Test"
+path = "C:\\Current projects\\Python\\Test"
 
 main(clone_request_list, path=path, force=True, depth=1)

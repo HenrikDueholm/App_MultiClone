@@ -10,11 +10,11 @@ from collections import namedtuple
 from enum import Enum, auto
 
 # Non-system
-from globals import globals_object
+from multiclone.sub.globals import globals_object
 
-from sub.clone_url import git_clone_url, clone_result
-from sub.post_clone_handler import post_clone_action_handler
-from sub.path import build_clone_dependencies_path
+from multiclone.sub.clone_url import git_clone_url
+from multiclone.sub.post_clone_handler import post_clone_action_handler
+from multiclone.sub.path import build_clone_dependencies_path
 
 #####################################################################################################
 # Define ############################################################################################
@@ -54,7 +54,7 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
 
     # Print config
     print("")
-    print("App_MultiClone (version 0.0.1.0)")
+    print("MultiClone (version 0.1.0)")
     print("")
     print("Config:")
     print(f"  Path: {path}")
@@ -270,7 +270,7 @@ if __name__ == "__main__":
         print("")
         print("Usage: python Main.py <url_list> [--path <value>] [--force <value>] [--depth <value>]")
         print("  <url_list>: Semicolon separated list of urls to clone. Specific versions can be acquired by space separated addition of:")
-        print("    branch=<branc name>: name of branch to clone")
+        print("    branch=<branch name>: name of branch to clone")
         print("    commit=<commit>: ID of specific commit to clone (disregards branch if present, however is disregarded itself on use of ALL_NEWEST)")
         print("  --path: Absolute path to roo clone folder (optional, default: os.getcwd())")
         print("  --version-action: Specifies how to handle repository versioning. Accepted values string or number:")
@@ -280,6 +280,11 @@ if __name__ == "__main__":
         print("  --force: Whether to force clone (optional, default: True)")
         print("  --depth: Clone depth (optional, default: 1)")
         print("")
+
+        # Wait on user action if the calling application is executable
+        if sys.argv[0].__contains__(".exe"):
+            input("Press enter to terminate...")
+
         sys.exit(1)
     else:
 
@@ -308,9 +313,9 @@ if __name__ == "__main__":
             if action_index + 1 < len(sys.argv):
                 action_value = sys.argv[action_index + 1]
                 try:
-                    version_action = int(action_value)  # Try parsing as an integer
+                    version_action = VersionAction(int(action_value))  # Try parsing as an integer
                 except ValueError:
-                    version_action = action_value  # Treat as a string
+                    version_action = VersionAction[action_value.upper()]  # Treat as a string
             else:
                 version_action = VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST  # Default value
         else:

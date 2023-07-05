@@ -1,47 +1,36 @@
 # Imports
 import os
 
-from globals import globals_object
-from sub.path import sanity_check_path
+from multiclone.sub.globals import globals_object
+from multiclone.sub.path import sanity_check_path
 
 ########################################################################################################################
-# Action_CreateFolder ##################################################################################################
+# Action_CreateMainFolder ##############################################################################################
 ########################################################################################################################
 
 """
-Create a folder either relative in Main or absolute anywhere. Supports use of windows environmental variables.
+Create a folder in main.
 
 action_data:
-    path (str): Absolute path with environmental variable support or path relative to Main.
+    path (str): Relative path that will be joined with main.
 
 Returns:
     status (boolean): True if folder created or already found.
 """
 
-class Action_CreateFolder:
+class Action_CreateMainFolder:
     def action(self):
         # Get global data
         path = globals_object.action_data
         main_path = globals_object.path_main
 
-        # Setup variables
-        indentation = "      "  # Default indentation for post clone actions
-
-        # Handle environmental variables in path
-        try:
-            expanded_path = os.path.expandvars(path)
-        except TypeError:
-            expanded_path = path
-
         # Sanity check path
-        if not sanity_check_path(expanded_path):
+        if not sanity_check_path(path):
             return False
 
-        # Append to main if relative path
-        if not os.path.isabs(expanded_path):
-            destination_path = os.path.join(main_path, expanded_path)
-        else:
-            destination_path = expanded_path
+        # Setup variables
+        destination_path = os.path.join(main_path, path)
+        indentation = "      "  # Default indentation for post clone actions
 
         # Check if folder exists
         if os.path.exists(destination_path):

@@ -3,8 +3,8 @@ import inspect
 import os
 import sys
 
-from globals import globals_object
-from clone_actions.Action_LinkToMain import Action_LinkToMain
+from multiclone.sub.globals import globals_object
+from multiclone.clone_actions.Action_LinkToMain import Action_LinkToMain
 
 #####################################################################################################
 # Core ##############################################################################################

@@ -1,8 +1,8 @@
 # Imports
 import os
 
-from globals import globals_object
-from sub.path import sanity_check_path
+from multiclone.sub.globals import globals_object
+from multiclone.sub.path import sanity_check_path
 
 ########################################################################################################################
 # Action_CreateFolderInSelf ############################################################################################

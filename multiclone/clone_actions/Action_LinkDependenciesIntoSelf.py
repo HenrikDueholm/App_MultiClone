@@ -1,11 +1,10 @@
 # Imports
 import os
 
-from globals import globals_object
-from sub.link.link_file_content import recreate_linked_folder_structure
-from sub.path import load_dependency_repo_names_from_file
-from clone_actions.Action_CreateFolderInSelf import create_folder_in_self
-from clone_actions.Action_LinkToFolder import create_soft_link
+from multiclone.sub.globals import globals_object
+from multiclone.sub.path import load_dependency_repo_names_from_file
+from multiclone.clone_actions.Action_CreateFolderInSelf import create_folder_in_self
+from multiclone.clone_actions.Action_LinkToFolder import create_soft_link
 
 ########################################################################################################################
 # Action_LinkDependenciesIntoSelf ######################################################################################

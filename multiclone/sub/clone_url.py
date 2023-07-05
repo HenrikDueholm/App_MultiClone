@@ -3,7 +3,7 @@ import subprocess
 
 from collections import namedtuple
 
-from sub.git.clone import git_clone
+from multiclone.sub.git.clone import git_clone
 
 # Define named tuple type
 clone_result = namedtuple("clone_result", ["path", "status"])

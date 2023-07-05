@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from globals import globals_object
+from multiclone.sub.globals import globals_object
 
 def delete_path_if_force(path):
     if os.path.exists(path) and globals_object.force:
@@ -27,7 +27,7 @@ def build_clone_dependencies_path(repo_path):
     return clone_dependencies_path
 
 # Extra imports for load_dependency_repo_names_from_file
-from sub.clone_url import extract_repo_name
+from multiclone.sub.clone_url import extract_repo_name
 def load_dependency_repo_names_from_file(repo_path):
     dependency_repo_names = []
     clone_dependencies_path = build_clone_dependencies_path(repo_path)
