@@ -22,12 +22,19 @@ To use MultiClone, you need to provide a list of repository URLs to clone. You c
 
 ```cmd
 multiclone "https://github.com/repo1;https://github.com/repo2" --version-action all_newest --force --depth 1
+```
 
 This command will clone the repositories repo1 and repo2 using the "all newest" versioning strategy, force cloning, and a depth of 1 commit.
 
+
+To get more details regarding the arguments and their usage run the application with no arguments.
+
 ## Source and Build
-Source code can be found at https://github.com/HenrikDueholm/App_MultiClone.
+
+Source code can be found at [https://github.com/HenrikDueholm/App_MultiClone](https://github.com/HenrikDueholm/App_MultiClone).
 Build by running "Build MultiClone Executable". This will build to the "Build_MultiClone"-repository (or folder if not cloned) next to the project folder.
+The "Build_MultiClone"-repository can be found at [https://github.com/HenrikDueholm/Build_MultiClone](https://github.com/HenrikDueholm/Build_MultiClone).
 
 ## License
+
 MultiClone is licensed under the MIT License. See the LICENSE file for more information.
