@@ -3,6 +3,7 @@ import os
 
 from multiclone.sub.globals import globals_object
 from multiclone.sub.path import sanity_check_path
+from multiclone.sub.path import create_folder
 
 ########################################################################################################################
 # Action_CreateFolderInSelf ############################################################################################
@@ -42,8 +43,7 @@ def create_folder_in_self(repo_path, folder_path):
 
     # Create folder
     try:
-        os.makedirs(destination_path)
-        status = True
+        status = create_folder(destination_path)
         log_string = f"{indentation}Folder created at path: {destination_path}"
     except OSError as e:
         # Exception handling

@@ -5,6 +5,7 @@ from multiclone.sub.globals import globals_object
 from multiclone.sub.path import load_dependency_repo_names_from_file
 from multiclone.clone_actions.Action_CreateFolderInSelf import create_folder_in_self
 from multiclone.clone_actions.Action_LinkToFolder import create_soft_link
+from multiclone.sub.link import create_folder_junction
 
 ########################################################################################################################
 # Action_LinkDependenciesIntoSelf ######################################################################################

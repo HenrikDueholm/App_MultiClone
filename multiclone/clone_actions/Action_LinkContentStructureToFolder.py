@@ -2,7 +2,8 @@
 import os
 
 from multiclone.sub.globals import globals_object
-from multiclone.sub.link.link_file_content import recreate_linked_folder_structure
+from multiclone.sub.link import recreate_linked_folder_structure
+from multiclone.sub.path import create_folder
 
 ########################################################################################################################
 # Action_LinkContentStructureToFolder ##################################################################################
@@ -48,6 +49,10 @@ class Action_LinkContentStructureToFolder:
             globals_object.pca_log_add(f"{repo_name}: target-argument missing from provided argument string")
             return False
         target_path = os.path.join(main_path, target_path_arg)
+        valid_target = create_folder(target_path)
+        if not valid_target:
+            globals_object.pca_log_add(f"{repo_name}: Failed to find or create target folder")
+            return False
 
         # Parse argument data from action_data - exclusions
         exclusions_split = arguments_string.split("exclusions=")

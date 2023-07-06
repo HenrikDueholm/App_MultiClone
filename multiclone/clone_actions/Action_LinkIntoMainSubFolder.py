@@ -2,8 +2,9 @@
 import os
 
 from multiclone.sub.globals import globals_object
-from multiclone.sub.path import delete_path_if_force
+from multiclone.sub.path import delete_junction_if_force
 from multiclone.sub.path import sanity_check_path
+from multiclone.sub.link import create_folder_junction
 
 ########################################################################################################################
 # Action_LinkIntoMainSubFolder #########################################################################################
@@ -40,13 +41,12 @@ class Action_LinkIntoMainSubFolder:
         destination_path = os.path.join(os.path.join(main_path, path), repo_name)
         indentation = "      "  # Default indentation for post clone actions
 
-        deletion_status = delete_path_if_force(destination_path)
+        deletion_status = delete_junction_if_force(destination_path)
 
         if deletion_status and not os.path.exists(destination_path):
             try:
                 # Action to take
-                os.symlink(source_path, destination_path)  # Replace with
-                status = True
+                status = create_folder_junction(destination_path, source_path)
                 log_string = f"{indentation}Soft link created: {destination_path} -> {source_path}"
             except OSError as e:
                 # Exception handling

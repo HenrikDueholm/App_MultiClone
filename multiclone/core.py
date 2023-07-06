@@ -54,13 +54,16 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
 
     # Print config
     print("")
-    print("MultiClone (version 0.1.0)")
+    print("MultiClone (version 0.1.1)")
     print("")
     print("Config:")
     print(f"  Path: {path}")
     print(f"  Version action: {version_action.name}")
     print(f"  Force: {force}")
     print(f"  Depth: {depth}")
+    print("")
+    print("Details:")
+    print(f"  Working directory: {os.getcwd()}")
     print("")
 
     # Create clone folders
@@ -120,8 +123,9 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
         print("No clone operations performed - Abort")
         sys.exit(1)
     print("")
-    # Clone dependencies
 
+    # Clone dependencies
+    clone_action_result = True
     if not all(clone_attempted_array):
         print("Clone dependencies:")
         all_done = False
@@ -142,7 +146,6 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
         elif status_array and any(status_array):
             print("Some clone operations failed")
         print("")
-
         clone_action_result = all(status_array)
 
     # Post clone action handling
@@ -231,8 +234,7 @@ def execute_clone(clone_info_list, path_source, version_action, force=False, dep
     url_array = []
     for info in clone_info_list:
         url_array.append(info.url)
-    
-    
+
     # Clone
     clone_info_list_addition = []
     for i, info in enumerate(clone_info_list):
@@ -259,87 +261,3 @@ def execute_clone(clone_info_list, path_source, version_action, force=False, dep
     clone_info_list.extend(clone_info_list_addition)
     
     return clone_info_list
-
-#####################################################################################################
-# CLI ###############################################################################################
-#####################################################################################################
-
-# Handle CLI
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("")
-        print("Usage: python Main.py <url_list> [--path <value>] [--force <value>] [--depth <value>]")
-        print("  <url_list>: Semicolon separated list of urls to clone. Specific versions can be acquired by space separated addition of:")
-        print("    branch=<branch name>: name of branch to clone")
-        print("    commit=<commit>: ID of specific commit to clone (disregards branch if present, however is disregarded itself on use of ALL_NEWEST)")
-        print("  --path: Absolute path to roo clone folder (optional, default: os.getcwd())")
-        print("  --version-action: Specifies how to handle repository versioning. Accepted values string or number:")
-        print("    1: USE_TARGET_IF_ARGUMENT_ELSE_NEWEST")
-        print("    2: ALL_NEWEST")
-        print("    3: ALWAYS_USE_TARGET")
-        print("  --force: Whether to force clone (optional, default: True)")
-        print("  --depth: Clone depth (optional, default: 1)")
-        print("")
-
-        # Wait on user action if the calling application is executable
-        if sys.argv[0].__contains__(".exe"):
-            input("Press enter to terminate...")
-
-        sys.exit(1)
-    else:
-
-        # Sanity check clone_info - url_list
-        url_list = sys.argv[1].split(";")
-        if not url_list:
-            print("No URLs provided. Exiting...")
-            sys.exit(1)
-
-        # Parse url list and build clone_request_list
-        clone_request_list = string_to_clone_elements(sys.argv[1], ";")
-
-        # Get path argument
-        if "--path" in sys.argv:
-            path_index = sys.argv.index("--path")
-            if path_index + 1 < len(sys.argv):
-                path = sys.argv[path_index + 1]
-            else:
-                path = None
-        else:
-            path = None
-            
-        # Get version-action argument
-        if "--version-action" in sys.argv:
-            action_index = sys.argv.index("--version-action")
-            if action_index + 1 < len(sys.argv):
-                action_value = sys.argv[action_index + 1]
-                try:
-                    version_action = VersionAction(int(action_value))  # Try parsing as an integer
-                except ValueError:
-                    version_action = VersionAction[action_value.upper()]  # Treat as a string
-            else:
-                version_action = VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST  # Default value
-        else:
-            version_action = VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST  # Default value
-
-        # Get force argument
-        if "--force" in sys.argv:
-            force_index = sys.argv.index("--force")
-            if force_index + 1 < len(sys.argv):
-                force = bool(sys.argv[force_index + 1])
-            else:
-                force = True
-        else:
-            force = True
-
-        # Get depth argument
-        if "--depth" in sys.argv:
-            depth_index = sys.argv.index("--depth")
-            if depth_index + 1 < len(sys.argv):
-                depth = int(sys.argv[depth_index + 1])
-            else:
-                depth = 1
-        else:
-            depth = 1
-
-        # Call main
-        main(clone_request_list, path=path, version_action=version_action, force=force, depth=depth)

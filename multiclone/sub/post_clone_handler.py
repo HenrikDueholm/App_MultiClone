@@ -6,9 +6,22 @@ import sys
 from multiclone.sub.globals import globals_object
 from multiclone.clone_actions.Action_LinkToMain import Action_LinkToMain
 
-#####################################################################################################
-# Core ##############################################################################################
-#####################################################################################################
+########################################################################################################################
+# Import post clone actions to include them in the build (find a better method later) ##################################
+########################################################################################################################
+
+import multiclone.clone_actions.Action_CreateFolder
+import multiclone.clone_actions.Action_CreateFolderInSelf
+import multiclone.clone_actions.Action_CreateMainFolder
+import multiclone.clone_actions.Action_LinkContentStructureToFolder
+import multiclone.clone_actions.Action_LinkDependenciesIntoSelf
+import multiclone.clone_actions.Action_LinkIntoMainSubFolder
+import multiclone.clone_actions.Action_LinkToFolder
+import multiclone.clone_actions.Action_LinkToMain
+
+########################################################################################################################
+# Core #################################################################################################################
+########################################################################################################################
 
 def post_clone_action_handler(paths, plugin_folders=None):
 
@@ -125,9 +138,9 @@ def post_clone_action_handler(paths, plugin_folders=None):
 
     return action_initial_status and action_status and action_final_status
 
-#####################################################################################################
-# Functions #########################################################################################
-#####################################################################################################
+########################################################################################################################
+# Functions ############################################################################################################
+########################################################################################################################
 
 def repository_action(paths, action_source=".postcloneactions", plugin_folders=None):
     """

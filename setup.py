@@ -9,7 +9,7 @@ setup(
         where=".",
         include=["multiclone*"]
     ),
-    scripts=["app_main.py", "bin/test_main.py"],
+    scripts=["core.py", "bin/test_multi_clone.py"],
     url="https://github.com/HenrikDueholm/App_MultiClone",
     license='LICENSE',
     description="A multi-cloning application for side by side cloning and post clone linking.",

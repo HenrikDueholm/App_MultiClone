@@ -26,7 +26,6 @@ multiclone "https://github.com/repo1;https://github.com/repo2" --version-action 
 
 This command will clone the repositories repo1 and repo2 using the "all newest" versioning strategy, force cloning, and a depth of 1 commit.
 
-
 To get more details regarding the arguments and their usage run the application with no arguments.
 
 ## Source and Build

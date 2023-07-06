@@ -1,1 +1,4 @@
-v0.1.0, 2023-07-05 -- First version log entry.
+v0.1.1, 2023-07-06 -- Changed to use junctions instead of symbolic linking on windows machines. Elevation is thus no longer required for standard operation. 
+                      Build now includes all default post-link-actions, however it still fails to run properly. Recommended use of python source for now.
+                      Project structure updated. To call either run cli_multi_clone.py or test_multi_clone.py.
+v0.1.0, 2023-07-05 -- First version log entry
