@@ -9,9 +9,6 @@ class GlobalVariables:
         # Get the directory containing the core.py file
         self.path_main_directory = os.path.dirname(self.path_main_script)
 
-        # Get the directory containing the default post clone plugins
-        self.path_default_clone_actions_directory = os.path.join(self.path_main_directory, "../clone_actions")
-
         # Execution variables - Path and names
         self.path_main = None
         self.path_source = None

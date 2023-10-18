@@ -86,5 +86,19 @@ if __name__ == "__main__":
         else:
             depth = 1
 
+        # Act on debug argument
+        if "--debug" in sys.argv:
+            root_folder = os.getcwd()
+            print("")
+            print(f"Full file print out of content within: {root_folder}")
+            for root, dirs, files in os.walk(root_folder):
+                level = root.replace(root_folder, '').count(os.sep)
+                indent = ' ' * 4 * (level)
+                print('{}{}/'.format(indent, os.path.basename(root)))
+                subindent = ' ' * 4 * (level + 1)
+                for f in files:
+                    print('{}{}'.format(subindent, f))
+            print("")
+
         # Call main
         main(clone_request_list, path=path, version_action=version_action, force=force, depth=depth)
