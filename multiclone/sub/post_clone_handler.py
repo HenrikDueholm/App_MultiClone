@@ -210,11 +210,23 @@ def load_plugins(plugin_folders=None):
     # Get a list of Python files in the folder
     files = []
     for folder in plugin_folders:
-        if os.path.isdir(folder):
+        # Handle environmental variables in path
+        try:
+            expanded_folder = os.path.expandvars(folder)
+        except TypeError:
+            expanded_folder = folder
+
+        # Append to main if relative path
+        if not os.path.isabs(expanded_folder):
+            target_path = os.path.join(globals_object.path_main, expanded_folder)
+        else:
+            target_path = expanded_folder
+
+        if os.path.isdir(target_path):
             # Add the module directory to the beginning of sys.path
-            sys.path.insert(0, str(folder))
+            sys.path.insert(0, str(target_path))
             # Get py files in folder
-            files.append([name for name in os.listdir(folder) if name.endswith(".py")])
+            files.append([name for name in os.listdir(target_path) if name.endswith(".py")])
 
     files = list(set(files))  # remove duplicate files
 

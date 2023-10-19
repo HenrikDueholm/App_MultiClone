@@ -56,6 +56,17 @@ if __name__ == "__main__":
         else:
             path = None
 
+        # Get action paths argument
+        if "--action-paths" in sys.argv:
+            action_paths_index = sys.argv.index("--action-paths")
+            if action_paths_index + 1 < len(sys.argv):
+                action_paths_string = sys.argv[action_paths_index + 1]
+                action_paths = action_paths_string.split(";")
+            else:
+                action_paths = None
+        else:
+            action_paths = None
+
         # Get version-action argument
         if "--version-action" in sys.argv:
             action_index = sys.argv.index("--version-action")
@@ -101,4 +112,5 @@ if __name__ == "__main__":
             print("")
 
         # Call main
-        main(clone_request_list, path=path, version_action=version_action, force=force, depth=depth)
+        main(clone_request_list, path=path, version_action=version_action, force=force, depth=depth,
+             action_paths=action_paths)

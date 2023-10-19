@@ -35,18 +35,22 @@ class VersionAction(Enum):
 #####################################################################################################
 
 def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_IF_ARGUMENT_ELSE_NEWEST,
-         force=True, depth=1):
+         force=True, depth=1, action_paths=None):
     """
-    Main function to perform the cloning process. When all provided elements have been cloned each repository will be searched (in order) for content of ".dependencies".
-    ".dependencies". should be formatted as the clone_request_list using linefeed instead of ";".
+    Main function to perform the cloning process.
+    When all provided elements have been cloned each repository will be searched (in order) for ".dependencies".
+    Content of ".dependencies". should be formatted as the clone_request_list using linefeed instead of ";".
     ".dependencies" will be cloned while new dependencies are found.
 
     Args:
-        clone_request_list (list): List of clone_request objects. Use space separated branch= or commit= to specify specific target version.
+        clone_request_list (list): List of clone_request objects.
+                                   Use space separated branch= or commit= to specify specific target version.
         path (str, optional, default = os.getcwd()): The absolute clone target path.
-        version_action (VersionAction, optional): Version action to perform. Default is USE_TARGET_IF_ARGUMENT_ELSE_NEWEST.
+        version_action (VersionAction, optional): Version action to perform.
+                                                  Default is USE_TARGET_IF_ARGUMENT_ELSE_NEWEST.
         force (bool, optional): Whether to force removal of existing repositories. Default is True.
         depth (int, optional): The depth of the clone (number of commits to include). Default is 1.
+        action_paths (str array, optional, default empty): Array of paths to load post clone actions from.
 
     Returns:
         list: List of boolean values indicating the success of each cloning operation.
@@ -154,8 +158,7 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
         if info.clone_status:
             path_array.append(info.clone_path)
 
-    action_result = post_clone_action_handler(path_array, plugin_folders=None)  # ToDo:
-    # Add plugin_folders config (external config?)
+    action_result = post_clone_action_handler(path_array, plugin_folders=action_paths)
 
     return clone_action_result and action_result
 
