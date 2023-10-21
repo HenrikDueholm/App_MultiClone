@@ -1,10 +1,17 @@
+# System imports
 import shutil
 import os
+
+# Core imports
+from multiclone.sub.path import create_folder
 
 files_to_copy = ['README.md', 'CHANGES.txt', 'LICENSE']
 folders_to_copy = ['docs']
 
 build_dir = '../Build_MultiClone'
+
+if not os.path.exists(build_dir):
+    create_folder(build_dir)
 
 for file in files_to_copy:
     source_file = file

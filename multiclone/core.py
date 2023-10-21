@@ -58,7 +58,7 @@ def main(clone_request_list, path=None, version_action=VersionAction.USE_TARGET_
 
     # Print config
     print("")
-    print("MultiClone (version 0.1.1)")
+    print("MultiClone (version 1.0.1)")
     print("")
     print("Config:")
     print(f"  Path: {path}")
