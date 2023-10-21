@@ -12,14 +12,15 @@ if current_dir == "/":
     print("Unable to find the repository root!")
     exit(1)
 
-# Set directory
+# Set directories
 os.chdir(current_dir)
+path_test = os.path.join(os.path.dirname(current_dir), "Test")
 
 # Imports after directory change
 from multiclone.core import main
 from multiclone.core import clone_request
 
-# Call MultiClone
+# Build clone request
 clone_request_list = []
 url = 'https://github.com/HenrikDueholm/LV32.2020..PPL.HDH.Driver.DMM'
 info = clone_request(url=url, branch=None, commit=None)
@@ -28,6 +29,5 @@ url = 'https://github.com/HenrikDueholm/LV32.2020..PPL.ClassLoader'
 info = clone_request(url=url, branch=None, commit=None)
 clone_request_list.append(info)
 
-path = "C:\\Current projects\\Python\\Test"
-
-main(clone_request_list, path=path, force=True, depth=1)
+# Call MultiClone
+main(clone_request_list, path=path_test, force=True, depth=1)
