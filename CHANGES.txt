@@ -1,3 +1,7 @@
+v1.0.?, yyyy-mm-dd -- Dev mode demo now path independent.
+v1.0.1, 2023-10-21 -- Updated version number in application. Build specification now under source control and independent of clone location.
+v1.0.0, 2023-10-19 -- Updated readme documentation and added CLI support for loading custom action plugins.
+v0.2.0, 2023-10-18 -- Default post clone actions integrated in post_clone_handler.py making build functional.
 v0.1.1, 2023-07-06 -- Changed to use junctions instead of symbolic linking on windows machines. Elevation is thus no longer required for standard operation. 
                       Build now includes all default post-link-actions, however it still fails to run properly. Recommended use of python source for now.
                       Project structure updated. To call either run cli_multi_clone.py or test_multi_clone.py.
